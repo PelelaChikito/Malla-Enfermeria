@@ -1,0 +1,529 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Enfermería UDD</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #fff5f8;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      color: #cc6699;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    .malla {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .semestre {
+      display: flex;
+      flex-direction: column;
+      border: 2px dashed #cc6699;
+      padding: 10px;
+      border-radius: 10px;
+      min-width: 200px;
+      background-color: #ffe4ec;
+      flex-shrink: 0;
+    }
+
+    .semestre-title {
+      color: #cc6699;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .course {
+      margin: 5px 0;
+      padding: 8px;
+      border: 2px solid #cc6699;
+      border-radius: 10px;
+      background-color: #ffb6c1;
+      cursor: pointer;
+      user-select: none;
+      text-align: center;
+      color: #5a0033;
+      transition: background-color 0.5s ease, opacity 0.5s ease, transform 0.3s ease;
+    }
+
+    .course:hover {
+      background-color: #ff4d88;
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .completed {
+      background-color: #d58fb2;
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+    .locked {
+      background-color: #f0c4d6;
+      color: #ccc;
+      border-color: #aaa;
+      cursor: not-allowed;
+    }
+
+    .animate-toggle {
+      animation: toggleAnim 0.5s ease forwards;
+    }
+
+    @keyframes toggleAnim {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0.5;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Enfermería UDD</h1>
+  <div id="courses" class="malla"></div>
+  <script>
+    const cursos = [
+  {
+    "semestre": 1,
+    "id": "BIO101",
+    "nombre": "Morfolog\u00eda",
+    "prereq": []
+  },
+  {
+    "semestre": 1,
+    "id": "QUIM101",
+    "nombre": "Bases te\u00f3ricas de Enfermer\u00eda y Bio\u00e9tica",
+    "prereq": []
+  },
+  {
+    "semestre": 1,
+    "id": "ENF101",
+    "nombre": "Bases Matem\u00e1ticas y Estad\u00edstica",
+    "prereq": []
+  },
+  {
+    "semestre": 1,
+    "id": "BIO101",
+    "nombre": "Electivo Track I",
+    "prereq": []
+  },
+  {
+    "semestre": 1,
+    "id": "QUIM101",
+    "nombre": "Ingl\u00e9s I",
+    "prereq": []
+  },
+  {
+    "semestre": 1,
+    "id": "ENF101",
+    "nombre": "Comunicaci\u00f3n Escrita",
+    "prereq": []
+  },
+  {
+    "semestre": 1,
+    "id": "ENF101",
+    "nombre": "Comunicaci\u00f3n Oral",
+    "prereq": []
+  },
+  {
+    "semestre": 2,
+    "id": "BIO102",
+    "nombre": "Bases Biol\u00f3gicas",
+    "prereq": [
+      "BIO101"
+    ]
+  },
+  {
+    "semestre": 2,
+    "id": "QUIM102",
+    "nombre": "Bases Qu\u00edmicas",
+    "prereq": [
+      "QUIM101"
+    ]
+  },
+  {
+    "semestre": 2,
+    "id": "ENF102",
+    "nombre": "Bases del Cuidado de Enfermer\u00eda",
+    "prereq": [
+      "ENF101"
+    ]
+  },
+  {
+    "semestre": 2,
+    "id": "BIO101",
+    "nombre": "Electivo Track II",
+    "prereq": []
+  },
+  {
+    "semestre": 2,
+    "id": "QUIM101",
+    "nombre": "Ingl\u00e9s II",
+    "prereq": []
+  },
+  {
+    "semestre": 2,
+    "id": "ENF101",
+    "nombre": "Lectura Cr\u00edtica",
+    "prereq": []
+  },
+  {
+    "semestre": 2,
+    "id": "ENF101",
+    "nombre": "Pensamiento Cr\u00edtico",
+    "prereq": []
+  },
+  {
+    "semestre": 3,
+    "id": "PAT101",
+    "nombre": "Fisiolog\u00eda B\u00e1sica",
+    "prereq": [
+      "BIO102"
+    ]
+  },
+  {
+    "semestre": 3,
+    "id": "FAR101",
+    "nombre": "Enfermer\u00eda Familiar y de la Comunidad",
+    "prereq": [
+      "QUIM102"
+    ]
+  },
+  {
+    "semestre": 3,
+    "id": "ENF102",
+    "nombre": "Microbiolog\u00eda",
+    "prereq": [
+      "ENF101"
+    ]
+  },
+  {
+    "semestre": 3,
+    "id": "BIO101",
+    "nombre": "Salud P\u00fablica y Epidemiolog\u00eda",
+    "prereq": []
+  },
+  {
+    "semestre": 3,
+    "id": "QUIM101",
+    "nombre": "Bioqu\u00edmica",
+    "prereq": []
+  },
+  {
+    "semestre": 3,
+    "id": "ENF101",
+    "nombre": "Electivo Track III",
+    "prereq": []
+  },
+  {
+    "semestre": 3,
+    "id": "ENF101",
+    "nombre": "Ingl\u00e9s III",
+    "prereq": []
+  },
+  {
+    "semestre": 4,
+    "id": "ENF201",
+    "nombre": "Fisiopatolog\u00eda",
+    "prereq": [
+      "ENF102",
+      "PAT101"
+    ]
+  },
+  {
+    "semestre": 4,
+    "id": "ENF202",
+    "nombre": "Cuidado de Enfemer\u00eda Cl\u00ednico",
+    "prereq": [
+      "ENF102"
+    ]
+  },
+  {
+    "semestre": 4,
+    "id": "FAR101",
+    "nombre": "Psicolog\u00eda de la Salud",
+    "prereq": [
+      "QUIM102"
+    ]
+  },
+  {
+    "semestre": 4,
+    "id": "ENF102",
+    "nombre": "Farmacolog\u00eda Cl\u00ednica",
+    "prereq": [
+      "ENF101"
+    ]
+  },
+  {
+    "semestre": 4,
+    "id": "BIO101",
+    "nombre": "Semana I",
+    "prereq": []
+  },
+  {
+    "semestre": 4,
+    "id": "QUIM101",
+    "nombre": "Electivo Track IV",
+    "prereq": []
+  },
+  {
+    "semestre": 4,
+    "id": "ENF101",
+    "nombre": "Ingl\u00e9s T\u00e9cnico",
+    "prereq": []
+  },
+  {
+    "semestre": 4,
+    "id": "ENF101",
+    "nombre": "Cr\u00e9ditos Extradisciplinares de Libre Elecci\u00f3n",
+    "prereq": []
+  },
+  {
+    "semestre": 5,
+    "id": "ENF301",
+    "nombre": "Cuidados de Enfermer\u00eda del Adulto I",
+    "prereq": [
+      "ENF201"
+    ]
+  },
+  {
+    "semestre": 5,
+    "id": "ENF302",
+    "nombre": "Educaci\u00f3n para la Salud",
+    "prereq": [
+      "ENF202"
+    ]
+  },
+  {
+    "semestre": 5,
+    "id": "ENF301",
+    "nombre": "Enfermer\u00eda de la Mujer y el Reci\u00e9n Nacido",
+    "prereq": [
+      "ENF201"
+    ]
+  },
+  {
+    "semestre": 5,
+    "id": "ENF302",
+    "nombre": "Enfermer\u00eda Psicosocial",
+    "prereq": [
+      "ENF202"
+    ]
+  },
+  {
+    "semestre": 6,
+    "id": "ENF401",
+    "nombre": "Cuidados de Enfermer\u00eda del Adulto II",
+    "prereq": [
+      "ENF301"
+    ]
+  },
+  {
+    "semestre": 6,
+    "id": "ENF402",
+    "nombre": "Fundamento Socioantropol\u00f3gicos de la Salud",
+    "prereq": [
+      "ENF401",
+      "ENF302"
+    ]
+  },
+  {
+    "semestre": 6,
+    "id": "ENF301",
+    "nombre": "Physical Exam",
+    "prereq": [
+      "ENF201"
+    ]
+  },
+  {
+    "semestre": 6,
+    "id": "ENF302",
+    "nombre": "Enfermer\u00eda Psiquiatr\u00eda",
+    "prereq": [
+      "ENF202"
+    ]
+  },
+  {
+    "semestre": 7,
+    "id": "ENF401",
+    "nombre": "Enfermer\u00eda en Urgencia",
+    "prereq": [
+      "ENF301"
+    ]
+  },
+  {
+    "semestre": 7,
+    "id": "ENF402",
+    "nombre": "Enfemer\u00eda en Salud Comunitaria",
+    "prereq": [
+      "ENF401",
+      "ENF302"
+    ]
+  },
+  {
+    "semestre": 7,
+    "id": "ENF301",
+    "nombre": "Investigaci\u00f3n Cualitativa y Cuantitativa",
+    "prereq": [
+      "ENF201"
+    ]
+  },
+  {
+    "semestre": 8,
+    "id": "ENF301",
+    "nombre": "Gesti\u00f3n en Enfermer\u00eda",
+    "prereq": [
+      "ENF201"
+    ]
+  },
+  {
+    "semestre": 8,
+    "id": "ENF302",
+    "nombre": "Enfermer\u00eda del Ni\u00f1o y del Adolescente",
+    "prereq": [
+      "ENF202"
+    ]
+  },
+  {
+    "semestre": 8,
+    "id": "ENF301",
+    "nombre": "Enfermer\u00eda Gerontogeri\u00e1trica",
+    "prereq": [
+      "ENF201"
+    ]
+  },
+  {
+    "semestre": 8,
+    "id": "ENF302",
+    "nombre": "Dise\u00f1o de Proyecto de Investigaci\u00f3n",
+    "prereq": [
+      "ENF202"
+    ]
+  },
+  {
+    "semestre": 8,
+    "id": "ENF302",
+    "nombre": "Cr\u00e9ditos Extradisciplinares de Libre Elecci\u00f3n",
+    "prereq": [
+      "ENF202"
+    ]
+  },
+  {
+    "semestre": 9,
+    "id": "ENF302",
+    "nombre": "Investigaci\u00f3n Aplicada en Salud",
+    "prereq": [
+      "ENF202"
+    ]
+  },
+  {
+    "semestre": 9,
+    "id": "ENF302",
+    "nombre": "Internado Comunitario",
+    "prereq": [
+      "ENF202"
+    ]
+  },
+  {
+    "semestre": 10,
+    "id": "ENF302",
+    "nombre": "Internado Hospitalitario",
+    "prereq": [
+      "ENF202"
+    ]
+  },
+  {
+    "semestre": 10,
+    "id": "ENF302",
+    "nombre": "Curso Electivo Opcional / Lab",
+    "prereq": [
+      "ENF202"
+    ]
+  },
+  {
+    "semestre": 10,
+    "id": "ENF302",
+    "nombre": "Curso Electivo Opcional / Lab",
+    "prereq": [
+      "ENF202"
+    ]
+  }
+];
+    let aprobados = JSON.parse(localStorage.getItem('aprobados') || '[]');
+
+    function guardar() {
+      localStorage.setItem('aprobados', JSON.stringify(aprobados));
+    }
+
+    function desbloqueado(curso) {
+      return curso.prereq.every(id => aprobados.includes(id));
+    }
+
+    function render() {
+      const cont = document.getElementById('courses');
+      cont.innerHTML = '';
+      const porSemestre = {};
+      cursos.forEach(c => {
+        if (!porSemestre[c.semestre]) porSemestre[c.semestre] = [];
+        porSemestre[c.semestre].push(c);
+      });
+
+      Object.keys(porSemestre).sort((a, b) => a - b).forEach(s => {
+        const bloque = document.createElement('div');
+        bloque.classList.add('semestre');
+        const titulo = document.createElement('div');
+        titulo.classList.add('semestre-title');
+        titulo.textContent = `Semestre ${s}`;
+        bloque.appendChild(titulo);
+
+        porSemestre[s].forEach(curso => {
+          const div = document.createElement('div');
+          div.classList.add('course');
+          div.textContent = curso.nombre;
+          if (aprobados.includes(curso.id)) {
+            div.classList.add('completed');
+          } else if (!desbloqueado(curso)) {
+            div.classList.add('locked');
+          }
+          div.onclick = () => {
+            if (div.classList.contains('locked')) return;
+            div.classList.add('animate-toggle');
+            div.addEventListener('animationend', () => {
+              div.classList.remove('animate-toggle');
+            }, {once: true});
+
+            if (aprobados.includes(curso.id)) {
+              aprobados = aprobados.filter(x => x !== curso.id);
+            } else {
+              aprobados.push(curso.id);
+            }
+            guardar();
+            render();
+          };
+          bloque.appendChild(div);
+        });
+        cont.appendChild(bloque);
+      });
+    }
+    render();
+  </script>
+</body>
+</html>
