@@ -1,0 +1,647 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Enfermería UDD</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #fff5f8;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      color: #cc6699;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    .malla {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .semestre {
+      display: flex;
+      flex-direction: column;
+      border: 2px dashed #cc6699;
+      padding: 10px;
+      border-radius: 10px;
+      min-width: 200px;
+      background-color: #ffe4ec;
+      flex-shrink: 0;
+    }
+
+    .semestre-title {
+      color: #cc6699;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .course {
+      margin: 5px 0;
+      padding: 8px;
+      border: 2px solid #cc6699;
+      border-radius: 10px;
+      background-color: #ffb6c1;
+      cursor: pointer;
+      user-select: none;
+      text-align: center;
+      color: #5a0033;
+      transition: background-color 0.5s ease, opacity 0.5s ease, transform 0.3s ease;
+    }
+
+    .course:hover {
+      background-color: #ff4d88;
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .completed {
+      background-color: #D8B4E2;
+      text-decoration: line-through;
+      opacity: 0.9;
+    }
+
+    .locked {
+      background-color: #f0c4d6;
+      color: #5a0033; /* Letra legible en bloqueados */
+      border-color: #aaa;
+      cursor: not-allowed;
+      opacity: 0.6; /* Opacidad para distinguir */
+    }
+
+    /* NUEVO: estilo para prerrequisitos resaltados */
+    .highlight-prereq {
+      background-color: #e8a6bb !important;
+      border-color: #cc6699 !important;
+      box-shadow: 0 0 5px #cc6699aa;
+    }
+
+    .animate-toggle {
+      animation: toggleAnim 0.5s ease forwards;
+    }
+
+    @keyframes toggleAnim {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0.5;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Enfermería UDD</h1>
+  <div id="courses" class="malla"></div>
+  <script>
+    // Cursos definidos
+    const cursos = [
+  {
+    "semestre": 1,
+    "id": "BIO101",
+    "nombre": "Morfolog\u00eda",
+    "prereq": []
+  },
+  {
+    "semestre": 1,
+    "id": "QUIM101",
+    "nombre": "Bases te\u00f3ricas de Enfermer\u00eda y Bio\u00e9tica",
+    "prereq": []
+  },
+  {
+    "semestre": 1,
+    "id": "ENF101",
+    "nombre": "Bases Matem\u00e1ticas y Estad\u00edstica",
+    "prereq": []
+  },
+  {
+    "semestre": 1,
+    "id": "TRK1",
+    "nombre": "Electivo Track I",
+    "prereq": []
+  },
+  {
+    "semestre": 1,
+    "id": "ING1",
+    "nombre": "Ingl\u00e9s I",
+    "prereq": []
+  },
+  {
+    "semestre": 1,
+    "id": "COME",
+    "nombre": "Comunicaci\u00f3n Escrita",
+    "prereq": []
+  },
+  {
+    "semestre": 1,
+    "id": "COMO",
+    "nombre": "Comunicaci\u00f3n Oral",
+    "prereq": []
+  },
+  {
+    "semestre": 2,
+    "id": "BIO102",
+    "nombre": "Bases Biol\u00f3gicas",
+    "prereq": []
+  },
+  {
+    "semestre": 2,
+    "id": "QUIM102",
+    "nombre": "Bases Qu\u00edmicas",
+    "prereq": []
+  },
+  {
+    "semestre": 2,
+    "id": "ENF102",
+    "nombre": "Bases del Cuidado de Enfermer\u00eda",
+    "prereq": [
+      "QUIM101"
+    ]
+  },
+  {
+    "semestre": 2,
+    "id": "TRK2",
+    "nombre": "Electivo Track II",
+    "prereq": []
+  },
+  {
+    "semestre": 2,
+    "id": "ING2",
+    "nombre": "Ingl\u00e9s II",
+    "prereq": [
+      "ING1"
+    ]
+  },
+  {
+    "semestre": 2,
+    "id": "LECT",
+    "nombre": "Lectura Cr\u00edtica",
+    "prereq": []
+  },
+  {
+    "semestre": 2,
+    "id": "PENS",
+    "nombre": "Pensamiento Cr\u00edtico",
+    "prereq": []
+  },
+  {
+    "semestre": 3,
+    "id": "PAT101",
+    "nombre": "Fisiolog\u00eda B\u00e1sica",
+    "prereq": [
+      "BIO102",
+      "BIO101"
+    ]
+  },
+  {
+    "semestre": 3,
+    "id": "FAR101",
+    "nombre": "Enfermer\u00eda Familiar y de la Comunidad",
+    "prereq": [
+      "ENF102"
+    ]
+  },
+  {
+    "semestre": 3,
+    "id": "MICR",
+    "nombre": "Microbiolog\u00eda",
+    "prereq": []
+  },
+  {
+    "semestre": 3,
+    "id": "EPID",
+    "nombre": "Salud P\u00fablica y Epidemiolog\u00eda",
+    "prereq": []
+  },
+  {
+    "semestre": 3,
+    "id": "BIOQ",
+    "nombre": "Bioqu\u00edmica",
+    "prereq": [
+      "BIO102",
+      "QUIM102"
+    ]
+  },
+  {
+    "semestre": 3,
+    "id": "TRK3",
+    "nombre": "Electivo Track III",
+    "prereq": []
+  },
+  {
+    "semestre": 3,
+    "id": "ING3",
+    "nombre": "Ingl\u00e9s III",
+    "prereq": [
+      "ING2"
+    ]
+  },
+  {
+    "semestre": 4,
+    "id": "ENF201",
+    "nombre": "Fisiopatolog\u00eda",
+    "prereq": [
+      "PAT101"
+    ]
+  },
+  {
+    "semestre": 4,
+    "id": "ENF202",
+    "nombre": "Cuidado de Enfemer\u00eda Cl\u00ednico",
+    "prereq": [
+      "ENF102"
+    ]
+  },
+  {
+    "semestre": 4,
+    "id": "PSIC",
+    "nombre": "Psicolog\u00eda de la Salud",
+    "prereq": []
+  },
+  {
+    "semestre": 4,
+    "id": "FARM",
+    "nombre": "Farmacolog\u00eda Cl\u00ednica",
+    "prereq": [
+      "BIOQ"
+    ]
+  },
+  {
+    "semestre": 4,
+    "id": "SEM1",
+    "nombre": "Semana I",
+    "prereq": [
+      "BIO101",
+      "QUIM101",
+      "ENF101",
+      "COME",
+      "COMO",
+      "BIO102",
+      "QUIM102",
+      "ENF102",
+      "LECT",
+      "PENS"
+    ]
+  },
+  {
+    "semestre": 4,
+    "id": "TRK4",
+    "nombre": "Electivo Track IV",
+    "prereq": []
+  },
+  {
+    "semestre": 4,
+    "id": "INGT",
+    "nombre": "Ingl\u00e9s T\u00e9cnico",
+    "prereq": [
+      "ING3"
+    ]
+  },
+  {
+    "semestre": 4,
+    "id": "EXTR",
+    "nombre": "Cr\u00e9ditos Extradisciplinares de Libre Elecci\u00f3n",
+    "prereq": []
+  },
+  {
+    "semestre": 5,
+    "id": "ENF301",
+    "nombre": "Cuidados de Enfermer\u00eda del Adulto I",
+    "prereq": [
+      "ENF201",
+      "ENF202",
+      "FARM"
+    ]
+  },
+  {
+    "semestre": 5,
+    "id": "ENF302",
+    "nombre": "Educaci\u00f3n para la Salud",
+    "prereq": [
+      "PSIC"
+    ]
+  },
+  {
+    "semestre": 5,
+    "id": "MUJE",
+    "nombre": "Enfermer\u00eda de la Mujer y el Reci\u00e9n Nacido",
+    "prereq": [
+      "ENF201"
+    ]
+  },
+  {
+    "semestre": 5,
+    "id": "PSOC",
+    "nombre": "Enfermer\u00eda Psicosocial",
+    "prereq": [
+      "PSIC"
+    ]
+  },
+  {
+    "semestre": 6,
+    "id": "ENF401",
+    "nombre": "Cuidados de Enfermer\u00eda del Adulto II",
+    "prereq": [
+      "ENF301"
+    ]
+  },
+  {
+    "semestre": 6,
+    "id": "SOAN",
+    "nombre": "Fundamento Socioantropol\u00f3gicos de la Salud",
+    "prereq": []
+  },
+  {
+    "semestre": 6,
+    "id": "EXAM",
+    "nombre": "Physical Exam",
+    "prereq": [
+      "INGT"
+    ]
+  },
+  {
+    "semestre": 6,
+    "id": "PSIQ",
+    "nombre": "Enfermer\u00eda Psiquiatr\u00eda",
+    "prereq": [
+      "FARM",
+      "PSOC"
+    ]
+  },
+  {
+    "semestre": 7,
+    "id": "URGE",
+    "nombre": "Enfermer\u00eda en Urgencia",
+    "prereq": [
+      "ENF401"
+    ]
+  },
+  {
+    "semestre": 7,
+    "id": "COMU",
+    "nombre": "Enfemer\u00eda en Salud Comunitaria",
+    "prereq": [
+      "ENF401",
+      "FAR101"
+    ]
+  },
+  {
+    "semestre": 7,
+    "id": "INV1",
+    "nombre": "Investigaci\u00f3n Cualitativa y Cuantitativa",
+    "prereq": []
+  },
+  {
+    "semestre": 8,
+    "id": "GEST",
+    "nombre": "Gesti\u00f3n en Enfermer\u00eda",
+    "prereq": []
+  },
+  {
+    "semestre": 8,
+    "id": "NINO",
+    "nombre": "Enfermer\u00eda del Ni\u00f1o y del Adolescente",
+    "prereq": [
+      "MUJE"
+    ]
+  },
+  {
+    "semestre": 8,
+    "id": "GERO",
+    "nombre": "Enfermer\u00eda Gerontogeri\u00e1trica",
+    "prereq": [
+      "ENF401"
+    ]
+  },
+  {
+    "semestre": 8,
+    "id": "DISP",
+    "nombre": "Dise\u00f1o de Proyecto de Investigaci\u00f3n",
+    "prereq": [
+      "INV1"
+    ]
+  },
+  {
+    "semestre": 8,
+    "id": "EXTR2",
+    "nombre": "Cr\u00e9ditos Extradisciplinares de Libre Elecci\u00f3n",
+    "prereq": []
+  },
+  {
+    "semestre": 9,
+    "id": "INV2",
+    "nombre": "Investigaci\u00f3n Aplicada en Salud",
+    "prereq": [
+      "DISP"
+    ]
+  },
+  {
+    "semestre": 9,
+    "id": "INCO",
+    "nombre": "Internado Comunitario",
+    "prereq": [
+      "BIO101",
+      "QUIM101",
+      "ENF101",
+      "TRK1",
+      "COME",
+      "COMO",
+      "BIO102",
+      "QUIM102",
+      "ENF102",
+      "TRK2",
+      "LECT",
+      "PENS",
+      "PAT101",
+      "FAR101",
+      "MICR",
+      "EPID",
+      "BIOQ",
+      "TRK3",
+      "ENF201",
+      "ENF202",
+      "PSIC",
+      "FARM",
+      "SEM1",
+      "TRK4",
+      "ENF301",
+      "ENF302",
+      "MUJE",
+      "PSOC",
+      "ENF401",
+      "SOAN",
+      "EXAM",
+      "PSIQ",
+      "URGE",
+      "COMU",
+      "INV1",
+      "GEST",
+      "NINO",
+      "GERO",
+      "DISP"
+    ]
+  },
+  {
+    "semestre": 10,
+    "id": "INHO",
+    "nombre": "Internado Hospitalitario",
+    "prereq": [
+      "BIO101",
+      "QUIM101",
+      "ENF101",
+      "TRK1",
+      "COME",
+      "COMO",
+      "BIO102",
+      "QUIM102",
+      "ENF102",
+      "TRK2",
+      "LECT",
+      "PENS",
+      "PAT101",
+      "FAR101",
+      "MICR",
+      "EPID",
+      "BIOQ",
+      "TRK3",
+      "ENF201",
+      "ENF202",
+      "PSIC",
+      "FARM",
+      "SEM1",
+      "TRK4",
+      "ENF301",
+      "ENF302",
+      "MUJE",
+      "PSOC",
+      "ENF401",
+      "SOAN",
+      "EXAM",
+      "PSIQ",
+      "URGE",
+      "COMU",
+      "INV1",
+      "GEST",
+      "NINO",
+      "GERO",
+      "DISP"
+    ]
+  },
+  {
+    "semestre": 10,
+    "id": "EOP1",
+    "nombre": "Curso Electivo Opcional / Lab",
+    "prereq": []
+  },
+  {
+    "semestre": 10,
+    "id": "EOP2",
+    "nombre": "Curso Electivo Opcional / Lab",
+    "prereq": []
+  }
+];
+    let aprobados = JSON.parse(localStorage.getItem('aprobados') || '[]');
+
+    function guardar() {
+      localStorage.setItem('aprobados', JSON.stringify(aprobados));
+    }
+
+    function desbloqueado(curso) {
+      return curso.prereq.every(id => aprobados.includes(id));
+    }
+
+    function render() {
+      const cont = document.getElementById('courses');
+      cont.innerHTML = '';
+      const porSemestre = {};
+      cursos.forEach(c => {
+        if (!porSemestre[c.semestre]) porSemestre[c.semestre] = [];
+        porSemestre[c.semestre].push(c);
+      });
+
+      // ORDENAR numéricamente para que semestre 10 vaya después de 9
+      Object.keys(porSemestre).sort((a,b) => a - b).forEach(s => {
+        const bloque = document.createElement('div');
+        bloque.classList.add('semestre');
+        const titulo = document.createElement('div');
+        titulo.classList.add('semestre-title');
+        titulo.textContent = `Semestre ${s}`;
+        bloque.appendChild(titulo);
+
+        porSemestre[s].forEach(curso => {
+          const div = document.createElement('div');
+          div.classList.add('course');
+
+          // Agregar atributo data-id para identificar cursos en DOM
+          div.setAttribute('data-id', curso.id);
+
+          div.textContent = curso.nombre;
+
+          // NUEVO: Tooltip con prerrequisitos
+          div.title = curso.prereq.length > 0
+            ? "Prerrequisitos: " + curso.prereq.join(", ")
+            : "Sin prerrequisitos";
+
+          if (aprobados.includes(curso.id)) {
+            div.classList.add('completed');
+          } else if (!desbloqueado(curso)) {
+            div.classList.add('locked');
+          }
+
+          // CLICK para marcar/aprobar curso
+          div.onclick = () => {
+            if (div.classList.contains('locked')) return;
+            div.classList.add('animate-toggle');
+            div.addEventListener('animationend', () => {
+              div.classList.remove('animate-toggle');
+            }, {once: true});
+
+            if (aprobados.includes(curso.id)) {
+              aprobados = aprobados.filter(x => x !== curso.id);
+            } else {
+              aprobados.push(curso.id);
+            }
+            guardar();
+            render();
+          };
+
+          // NUEVO: al entrar mouse, resaltar prerrequisitos
+          div.addEventListener('mouseenter', () => {
+            curso.prereq.forEach(pid => {
+              document.querySelectorAll(`[data-id='${pid}']`).forEach(el => {
+                el.classList.add('highlight-prereq');
+              });
+            });
+          });
+
+          // NUEVO: al salir mouse, quitar resaltado
+          div.addEventListener('mouseleave', () => {
+            document.querySelectorAll('.highlight-prereq').forEach(el => {
+              el.classList.remove('highlight-prereq');
+            });
+          });
+
+          bloque.appendChild(div);
+        });
+        cont.appendChild(bloque);
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>
